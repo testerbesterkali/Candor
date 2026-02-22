@@ -68,21 +68,11 @@ export default function TalentBank() {
     return (
         <div className="space-y-6 animate-in fade-in p-8 pb-20">
 
-            {/* Header */}
-            <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-10 shadow-xl">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-500/20 to-cyan-500/0 rounded-full blur-3xl" />
-
-                <div className="relative z-10">
-                    <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-indigo-300 backdrop-blur-md mb-4 shadow-sm">
-                        <Zap className="mr-1.5 h-3.5 w-3.5 text-amber-400" fill="currentColor" />
-                        AI Auto-Matching
-                    </div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
-                        Talent Bank
-                    </h1>
-                    <p className="text-slate-400 max-w-2xl text-lg">
-                        Candor scans previous silver-medalist candidates against your new open roles and automatically surfaces high-affinity matches.
-                    </p>
+            {/* Sleek Header */}
+            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Talent Bank</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">Rediscover past candidates for new roles.</p>
                 </div>
             </div>
 

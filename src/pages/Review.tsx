@@ -80,16 +80,16 @@ export default function Review() {
                 <ArrowLeft className="w-4 h-4 mr-1" /> Back to pipeline
             </button>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-5">
                 <div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Review Draft</h1>
-                    <p className="text-slate-500 mt-2 text-lg">
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Review Draft</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
                         To: <span className="font-medium text-slate-700">{communication.candidates?.name}</span> ({communication.candidates?.email})
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => navigate(-1)}>Save & Close</Button>
-                    <Button onClick={handleSend} disabled={isSending || communication.status === 'sent'} className="shadow-md">
+                    <Button variant="outline" onClick={() => navigate(-1)} className="shadow-none">Save & Close</Button>
+                    <Button onClick={handleSend} disabled={isSending || communication.status === 'sent'} className="shadow-none">
                         {isSending ? 'Sending...' : <><Send className="w-4 h-4 mr-2" /> Approve & Send</>}
                     </Button>
                 </div>

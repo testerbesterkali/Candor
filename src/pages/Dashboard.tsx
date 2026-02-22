@@ -95,25 +95,15 @@ export default function Dashboard() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-8 pb-20">
 
-            {/* Header Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-10 shadow-xl">
-                {/* Background decorative elements */}
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-gradient-to-br from-indigo-500/20 to-purple-500/0 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 bg-gradient-to-tr from-blue-500/20 to-emerald-500/0 rounded-full blur-3xl" />
-
-                <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300 backdrop-blur-md mb-4">
-                            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-indigo-400" />
-                            {company?.name || 'Your Company'} Workspace
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
-                            {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Recruiter</span>
-                        </h1>
-                        <p className="text-slate-400 max-w-xl text-lg">
-                            Here's what's happening across your active hiring pipeline today. Let's build some great relationships.
-                        </p>
-                    </div>
+            {/* Sleek Header */}
+            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                        {greeting}, <span className="text-primary">Recruiter</span>
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Here's what's happening across your active hiring pipeline today.
+                    </p>
                 </div>
             </div>
 

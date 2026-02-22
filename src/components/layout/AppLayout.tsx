@@ -25,7 +25,7 @@ export default function AppLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex">
+        <div className="h-screen w-full bg-background flex overflow-hidden">
             {/* Sidebar */}
             <aside className="w-64 border-r border-slate-200 bg-white flex flex-col fixed inset-y-0 left-0 z-50">
                 <div className="p-6">
@@ -80,10 +80,8 @@ export default function AppLayout() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-64 min-h-screen">
-                <div className="w-full">
-                    <Outlet />
-                </div>
+            <main className="flex-1 ml-64 h-full overflow-y-auto min-w-0 flex flex-col relative">
+                <Outlet />
             </main>
         </div>
     )

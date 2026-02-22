@@ -49,9 +49,9 @@ export default function Settings() {
         <div className="animate-in fade-in p-8 pb-20">
 
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Workspace Settings</h1>
-                <p className="text-slate-500 mt-2 text-lg">Manage your company profile, integrations, and team.</p>
+            <div className="mb-6 pb-5 border-b border-slate-200">
+                <h1 className="text-xl font-bold text-slate-900 tracking-tight">Workspace Settings</h1>
+                <p className="text-sm text-slate-500 mt-0.5">Manage your company profile, integrations, and team.</p>
             </div>
 
             <div className="flex flex-col md:flex-row gap-8">
