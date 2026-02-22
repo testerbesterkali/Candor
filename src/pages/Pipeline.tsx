@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { formatTimeAgo, cn } from '../lib/utils'
 import { Button } from '../components/ui/Button'
-import { Search, Filter, Mail, Clock, MoreHorizontal, X, FileText, User as UserIcon, Calendar, CheckCircle2, AlertTriangle, MessageSquare, Plus, Circle, Sun, Settings2, XCircle } from 'lucide-react'
+import { Search, Filter, Mail, Clock, MoreHorizontal, X, FileText, User as UserIcon, Calendar, CheckCircle2, AlertTriangle, MessageSquare, Plus, Circle, Sun, Settings2, XCircle, Trash2, CheckSquare } from 'lucide-react'
 
 // Define the stages
 const STAGES = [
@@ -20,6 +20,8 @@ export default function Pipeline() {
     const { company } = useAuthStore()
     const [search, setSearch] = useState('')
     const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null)
+    const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('all')
+    const [bulkSelectedIds, setBulkSelectedIds] = useState<string[]>([])
 
     const { data: candidates, isLoading } = useQuery({
         queryKey: ['pipelineCandidates', company?.id],
@@ -40,13 +42,30 @@ export default function Pipeline() {
         enabled: !!company
     })
 
-    const filtered = candidates?.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.roles?.title?.toLowerCase().includes(search.toLowerCase()) ||
-        c.status?.toLowerCase().includes(search.toLowerCase())
-    ) || []
+    const uniqueRoles = Array.from(new Set(candidates?.map(c => c.roles?.title).filter(Boolean))) as string[]
+
+    const filtered = candidates?.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+            c.roles?.title?.toLowerCase().includes(search.toLowerCase()) ||
+            c.status?.toLowerCase().includes(search.toLowerCase())
+
+        const matchesRole = selectedRoleFilter === 'all' || c.roles?.title === selectedRoleFilter
+
+        return matchesSearch && matchesRole
+    }) || []
 
     const selectedCandidate = candidates?.find(c => c.id === selectedCandidateId)
+
+    const toggleBulkSelect = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation()
+        setBulkSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+    }
+
+    const handleBulkReject = () => {
+        alert(`Initiating bulk rejection for ${bulkSelectedIds.length} candidates. Candor will generate individual personalized emails for each based on their resume.`)
+        // Future: Mutation to update statuses
+        setBulkSelectedIds([])
+    }
 
     return (
         <div className="flex-1 flex flex-col h-full w-full min-h-0 min-w-0 overflow-hidden relative animate-in fade-in duration-500 bg-slate-50/50">
@@ -58,18 +77,49 @@ export default function Pipeline() {
                         <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Pipeline</h1>
                         <p className="text-sm text-slate-500 mt-0.5 truncate">Manage candidate communication statuses across all open roles.</p>
                     </div>
-                    <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search candidates, roles..."
-                                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all transition-colors"
-                                value={search}
-                                onChange={e => setSearch(e.target.value)}
-                            />
-                        </div>
-                        <Button variant="outline" size="icon" className="shrink-0 bg-white"><Filter className="w-4 h-4 text-slate-600" /></Button>
+                    <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 flex-wrap sm:flex-nowrap">
+
+                        {bulkSelectedIds.length > 0 ? (
+                            <div className="flex bg-slate-100 items-center gap-4 px-4 py-2 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-right-4">
+                                <span className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                    <CheckSquare className="w-4 h-4 text-primary" />
+                                    {bulkSelectedIds.length} Selected
+                                </span>
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" className="h-8 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700" onClick={handleBulkReject}>
+                                        <Trash2 className="w-4 h-4 mr-2" /> Bulk Reject
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-500 hover:bg-slate-200" onClick={() => setBulkSelectedIds([])}>
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <select
+                                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
+                                    value={selectedRoleFilter}
+                                    onChange={(e) => setSelectedRoleFilter(e.target.value)}
+                                >
+                                    <option value="all">All Roles</option>
+                                    {uniqueRoles.map(role => (
+                                        <option key={role} value={role}>{role}</option>
+                                    ))}
+                                </select>
+
+                                <div className="relative w-full sm:w-64 max-w-[200px] shrink-0">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <Button variant="outline" size="icon" className="shrink-0 bg-white"><Filter className="w-4 h-4 text-slate-600" /></Button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -115,6 +165,9 @@ export default function Pipeline() {
                                                 candidate={c}
                                                 onClick={() => setSelectedCandidateId(c.id)}
                                                 isSelected={selectedCandidateId === c.id}
+                                                isBulkSelected={bulkSelectedIds.includes(c.id)}
+                                                onBulkToggle={(e: React.MouseEvent) => toggleBulkSelect(c.id, e)}
+                                                bulkModeActive={bulkSelectedIds.length > 0}
                                             />
                                         ))}
                                     </div>
@@ -253,7 +306,7 @@ export default function Pipeline() {
     )
 }
 
-function CandidateCard({ candidate, onClick, isSelected }: any) {
+function CandidateCard({ candidate, onClick, isSelected, isBulkSelected, onBulkToggle, bulkModeActive }: any) {
     const comms = candidate.communications || [];
     comms.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     const latestComm = comms[0]
@@ -288,11 +341,24 @@ function CandidateCard({ candidate, onClick, isSelected }: any) {
         <div
             onClick={onClick}
             className={cn(
-                "group cursor-pointer p-4 bg-white rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md",
-                isSelected ? "border-primary ring-1 ring-primary/20 shadow-md" : "border-slate-200 hover:border-slate-300"
+                "group cursor-pointer p-4 bg-white rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md relative",
+                isSelected ? "border-primary ring-1 ring-primary/20 shadow-md" : "border-slate-200 hover:border-slate-300",
+                isBulkSelected && "border-primary bg-primary/5 ring-1 ring-primary"
             )}
         >
-            <div className="flex items-start justify-between mb-3">
+            {/* Bulk Selection Checkbox */}
+            <div
+                className={cn(
+                    "absolute top-4 right-4 z-10 w-5 h-5 flex items-center justify-center rounded border transition-all duration-200 bg-white",
+                    bulkModeActive || isBulkSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+                    isBulkSelected ? "border-primary bg-primary" : "border-slate-300 hover:border-primary",
+                )}
+                onClick={onBulkToggle}
+            >
+                {isBulkSelected && <CheckSquare className="w-4 h-4 text-white p-0.5" />}
+            </div>
+
+            <div className="flex items-start justify-between mb-3 pr-8">
                 <div>
                     <h3 className="text-[13px] font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors line-clamp-2">{candidate.name}</h3>
                     <p className="text-xs font-medium text-slate-500 mt-1 line-clamp-1">{candidate.roles?.title || 'Unknown Role'}</p>

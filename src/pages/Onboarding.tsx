@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
-import { Building2, MessageSquare, BellRing } from 'lucide-react'
+import { Building2, MessageSquare, BellRing, CheckCircle2, Sparkles } from 'lucide-react'
 
 const TONES = [
     { id: 'professional', label: 'Professional', sample: 'We appreciate your interest and have decided to move forward with other candidates.' },
@@ -154,10 +154,38 @@ export default function Onboarding() {
                             </div>
 
                             {voiceProfile && (
-                                <div className="p-4 bg-green-50 border border-green-100 rounded-xl space-y-2">
-                                    <h5 className="font-semibold text-green-900 flex items-center gap-2">✓ Voice Profile Extracted</h5>
-                                    <p className="text-sm text-green-800">Average length: {voiceProfile.avg_length_words} words. Closes with: "{voiceProfile.sign_off}".</p>
-                                    <p className="text-sm text-green-700/80 italic">Saved to your company profile automatically.</p>
+                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-8 pt-6 border-t border-slate-100">
+                                    <h4 className="font-semibold text-sm uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        3. Review your Voice Profile
+                                    </h4>
+                                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                                        <div className="bg-slate-50 border-b border-slate-100 px-4 py-3 flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs ring-1 ring-indigo-200">
+                                                {(company?.name || 'C').charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-900 leading-none mb-0.5">{company?.name || 'Your Company'}</p>
+                                                <p className="text-xs text-slate-500 leading-none">To: Sarah Jenkins</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-5 space-y-4 bg-white">
+                                            <p className="text-sm font-semibold text-slate-900 border-b border-slate-100 pb-3">Update on your application for Product Designer</p>
+                                            <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed pb-2 font-medium">
+                                                {`Hi Sarah,\n\n${tone === 'professional' ? 'Thank you for taking the time to apply and speak with our team. While we were impressed by your background, we have decided to move forward with another candidate whose experience better aligns with our current needs.' :
+                                                        tone === 'casual' ? 'Thanks so much for chatting with us! We loved getting to know you, but we\'ve decided to go in a different direction for this role right now.' :
+                                                            'We really appreciated the time you spent interviewing with us. While your skills are strong, we felt another candidate was a slightly closer match for what we need at this stage.'
+                                                    }\n\nWe wish you the best of luck in your job search.\n\n${voiceProfile?.sign_off || 'Best regards'},\n${company?.name || 'The Team'}`}
+                                            </div>
+                                        </div>
+                                        <div className="bg-emerald-50/50 border-t border-emerald-100 px-4 py-3 flex items-start gap-2">
+                                            <Sparkles className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-emerald-800">Voice Profile Extracted Successfully</p>
+                                                <p className="text-xs text-emerald-700/80 mt-0.5">Average length: {voiceProfile.avg_length_words} words. Lexical tone matched to {TONES.find(t => t.id === tone)?.label}.</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
