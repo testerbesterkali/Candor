@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { formatTimeAgo, cn } from '../lib/utils'
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
-import { Send, Clock, Users, Activity, ArrowRight } from 'lucide-react'
+import { Card } from '../components/ui/Card'
+import { Send, Clock, Users, Activity, ArrowRight, Sparkles, CheckCircle2, ChevronRight, Mail, AlertTriangle } from 'lucide-react'
 
 export default function Dashboard() {
     const { company } = useAuthStore()
@@ -32,7 +32,7 @@ export default function Dashboard() {
             return {
                 emailsSent: emailsSent || 0,
                 talentBank: talentBank || 0,
-                avgResponseTime: '24 hours', // Mocked calculation for MVP until edge function populates it accurately
+                avgResponseTime: '24 hrs', // Mocked calculation for MVP until edge function populates it accurately
                 candorScore: company!.candor_score || 0
             }
         },
@@ -79,112 +79,203 @@ export default function Dashboard() {
         queryFn: async () => {
             const { data } = await supabase
                 .from('communications')
-                .select('*, candidates(name)')
+                .select('*, candidates(name, roles(title))')
                 .eq('company_id', company!.id)
                 .order('created_at', { ascending: false })
-                .limit(10)
+                .limit(8)
             return data || []
         },
         enabled: !!company
     })
 
-    return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-16">
+    // Welcome message based on time of day
+    const hour = new Date().getHours()
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground">Here is what's happening across your active hiring pipeline today.</p>
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Header Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-10 shadow-xl">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-gradient-to-br from-indigo-500/20 to-purple-500/0 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 bg-gradient-to-tr from-blue-500/20 to-emerald-500/0 rounded-full blur-3xl" />
+
+                <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300 backdrop-blur-md mb-4">
+                            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-indigo-400" />
+                            {company?.name || 'Your Company'} Workspace
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
+                            {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Recruiter</span>
+                        </h1>
+                        <p className="text-slate-400 max-w-xl text-lg">
+                            Here's what's happening across your active hiring pipeline today. Let's build some great relationships.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
-                    title="Emails sent this month"
+                    title="Emails Sent"
+                    subtitle="This month"
                     value={stats?.emailsSent}
                     icon={Send}
                     loading={statsLoading}
+                    trend="+12%"
+                    trendUp={true}
                 />
                 <StatCard
-                    title="Avg response time"
+                    title="Avg Response"
+                    subtitle="To candidates"
                     value={stats?.avgResponseTime}
                     icon={Clock}
                     loading={statsLoading}
+                    trend="Faster"
+                    trendUp={true}
                 />
                 <StatCard
-                    title="Candidates in talent bank"
+                    title="Talent Bank"
+                    subtitle="Total candidates"
                     value={stats?.talentBank}
                     icon={Users}
                     loading={statsLoading}
+                    trend="+4"
+                    trendUp={true}
                 />
                 <StatCard
                     title="Candor Score"
+                    subtitle="Out of 100"
                     value={stats?.candorScore}
                     icon={Activity}
                     loading={statsLoading}
                     valueColor={
-                        (stats?.candorScore || 0) >= 70 ? 'text-green-600' :
-                            (stats?.candorScore || 0) >= 40 ? 'text-yellow-600' : 'text-red-600'
+                        (stats?.candorScore || 0) >= 70 ? 'text-emerald-600' :
+                            (stats?.candorScore || 0) >= 40 ? 'text-amber-500' : 'text-rose-500'
+                    }
+                    iconBg={
+                        (stats?.candorScore || 0) >= 70 ? 'bg-emerald-100 text-emerald-600' :
+                            (stats?.candorScore || 0) >= 40 ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'
                     }
                 />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* Needs Attention Panel */}
+                {/* Left Column: Needs Attention */}
                 <div className="lg:col-span-2 space-y-6">
-                    <h2 className="text-xl font-bold text-foreground">Needs Your Attention</h2>
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Needs Your Attention</h2>
+                    </div>
 
-                    <div className="grid gap-4">
+                    <div className="grid gap-3">
                         <AttentionCard
                             count={needsAttention?.drafts}
                             loading={attentionLoading}
                             title="Emails pending review"
-                            description="AI generated emails that did not meet the exact confidence threshold."
+                            description="AI drafted emails that require human approval before sending."
                             linkTo="/pipeline"
+                            icon={Mail}
+                            color="blue"
                         />
                         <AttentionCard
                             count={needsAttention?.overdue}
                             loading={attentionLoading}
                             title="Overdue candidates"
-                            description="Candidates residing in the same stage for more than 7 days without a status nudge."
+                            description="Candidates residing in the same stage for more than 7 days."
                             linkTo="/pipeline"
+                            icon={AlertTriangle}
+                            color="amber"
                         />
                         <AttentionCard
                             count={needsAttention?.unactionedMatches}
                             loading={attentionLoading}
                             title="Unactioned talent matches"
-                            description="We found past candidates perfectly matching your new roles."
+                            description="Past silver-medal candidates perfectly matching your new roles."
                             linkTo="/talent-bank"
+                            icon={Sparkles}
+                            color="indigo"
                         />
                     </div>
                 </div>
 
-                {/* Activity Feed */}
+                {/* Right Column: Activity Feed */}
                 <div className="space-y-6">
-                    <h2 className="text-xl font-bold text-foreground">Recent Activity</h2>
-                    <Card className="glass-panel overflow-hidden">
-                        <div className="divide-y divide-slate-100 max-h-[460px] overflow-y-auto">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Recent Activity</h2>
+                        <Link to="/pipeline" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center">
+                            View all <ChevronRight className="w-4 h-4 ml-0.5" />
+                        </Link>
+                    </div>
+
+                    <Card className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col h-[400px]">
+                        <div className="flex-1 overflow-y-auto p-2">
                             {activityLoading ? (
                                 <div className="p-4 space-y-4">
-                                    {[1, 2, 3].map(i => <div key={i} className="h-12 bg-slate-100 rounded animate-pulse" />)}
+                                    {[1, 2, 3, 4].map(i => (
+                                        <div key={i} className="flex gap-4 items-start">
+                                            <div className="w-2 h-2 mt-2 rounded-full bg-slate-200 animate-pulse" />
+                                            <div className="space-y-2 flex-1">
+                                                <div className="h-4 w-3/4 bg-slate-100 rounded animate-pulse" />
+                                                <div className="h-3 w-1/2 bg-slate-50 rounded animate-pulse" />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : activity?.length === 0 ? (
-                                <div className="p-8 text-center text-sm text-muted-foreground">
-                                    No recent activity to display.
+                                <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3 border border-slate-100">
+                                        <Clock className="w-6 h-6 text-slate-300" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-900">No recent activity</p>
+                                    <p className="text-xs text-slate-500 mt-1">Actions will appear here automatically.</p>
                                 </div>
-                            ) : activity?.map(entry => (
-                                <div key={entry.id} className="p-4 hover:bg-slate-50 transition-colors">
-                                    <p className="text-sm font-medium text-foreground">
-                                        {entry.candidates?.name || 'Unknown Candidate'}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                        {entry.status === 'sent' ? `Email sent - ${entry.type}` : `Email drafted (${entry.type})`}
-                                    </p>
-                                    <p className="text-xs text-slate-400 mt-2 font-mono">
-                                        {formatTimeAgo(entry.created_at)}
-                                    </p>
+                            ) : (
+                                <div className="relative">
+                                    {/* Timeline line */}
+                                    <div className="absolute left-6 top-4 bottom-4 w-px bg-slate-100" />
+
+                                    <div className="space-y-1 relative pt-2">
+                                        {activity?.map((entry: any) => (
+                                            <div key={entry.id} className="relative flex gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors group">
+                                                <div className="mt-1 relative z-10 w-6 flex justify-center shrink-0">
+                                                    <div className={cn(
+                                                        "w-2.5 h-2.5 rounded-full ring-4 ring-white shadow-sm transition-transform group-hover:scale-125",
+                                                        entry.status === 'sent' ? 'bg-emerald-500' : 'bg-slate-300'
+                                                    )} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-baseline justify-between gap-2">
+                                                        <p className="text-sm font-semibold text-slate-900 truncate">
+                                                            {entry.candidates?.name || 'Unknown Candidate'}
+                                                        </p>
+                                                        <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
+                                                            {formatTimeAgo(entry.created_at)}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                                                        {entry.candidates?.roles?.title}
+                                                    </p>
+                                                    <div className="mt-1.5 flex items-center gap-1.5">
+                                                        <span className={cn(
+                                                            "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider",
+                                                            entry.status === 'sent'
+                                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50"
+                                                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                                                        )}>
+                                                            {entry.status === 'sent' ? 'Sent' : 'Drafted'}
+                                                        </span>
+                                                        <span className="text-xs text-slate-500 capitalize">{entry.type}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </Card>
                 </div>
@@ -194,55 +285,109 @@ export default function Dashboard() {
     )
 }
 
-function StatCard({ title, value, icon: Icon, loading, valueColor = "text-foreground" }: any) {
+function StatCard({ title, subtitle, value, icon: Icon, loading, valueColor = "text-slate-900", iconBg = "bg-primary/10 text-primary", trend, trendUp }: any) {
     return (
-        <Card className="glass-panel overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary/20" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-                <Icon className="w-4 h-4 text-muted-foreground/60" />
-            </CardHeader>
-            <CardContent>
-                {loading ? (
-                    <div className="h-8 w-16 bg-slate-100 rounded animate-pulse" />
-                ) : (
-                    <div className={cn("text-3xl font-bold", valueColor)}>
-                        {value !== undefined ? value : '—'}
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200 rounded-2xl overflow-hidden group">
+            <div className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110", iconBg)}>
+                        <Icon className="w-5 h-5" />
                     </div>
-                )}
-            </CardContent>
+                    {trend && (
+                        <div className={cn(
+                            "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold",
+                            trendUp ? "text-emerald-700 bg-emerald-50 border border-emerald-100" : "text-rose-700 bg-rose-50 border border-rose-100"
+                        )}>
+                            {trend}
+                        </div>
+                    )}
+                </div>
+                <div>
+                    {loading ? (
+                        <div className="h-8 w-20 bg-slate-100 rounded animate-pulse mb-1" />
+                    ) : (
+                        <div className={cn("text-3xl font-bold tracking-tight mb-1", valueColor)}>
+                            {value !== undefined ? value : '—'}
+                        </div>
+                    )}
+                    <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+                </div>
+            </div>
         </Card>
     )
 }
 
-function AttentionCard({ count, loading, title, description, linkTo }: any) {
+function AttentionCard({ count, loading, title, description, linkTo, icon: Icon, color }: any) {
     if (loading) {
-        return <Card className="glass-panel h-24 animate-pulse bg-slate-50" />
+        return <Card className="bg-white h-[90px] border border-slate-200 rounded-2xl animate-pulse" />
     }
 
     const isZero = count === 0;
 
+    const colorConfig = {
+        blue: {
+            bg: "bg-blue-50 border-blue-200/60 hover:border-blue-300",
+            iconBg: "bg-blue-100 text-blue-600 ring-4 ring-blue-50",
+            text: "text-blue-900",
+            iconDefaultBg: "bg-slate-50 text-slate-400 border border-slate-200",
+        },
+        amber: {
+            bg: "bg-amber-50/50 border-amber-200/60 hover:border-amber-300",
+            iconBg: "bg-amber-100 text-amber-600 ring-4 ring-amber-50",
+            text: "text-amber-900",
+            iconDefaultBg: "bg-slate-50 text-slate-400 border border-slate-200",
+        },
+        indigo: {
+            bg: "bg-indigo-50/50 border-indigo-200/60 hover:border-indigo-300",
+            iconBg: "bg-indigo-100 text-indigo-600 ring-4 ring-indigo-50",
+            text: "text-indigo-900",
+            iconDefaultBg: "bg-slate-50 text-slate-400 border border-slate-200",
+        }
+    }[color as 'blue' | 'amber' | 'indigo'];
+
     return (
-        <Link to={linkTo} className={cn("block transition-transform hover:-translate-y-1", isZero && "opacity-60 hover:translate-y-0 pointer-events-none")}>
+        <Link to={linkTo} className={cn(
+            "block transition-all duration-200",
+            isZero ? "opacity-60 pointer-events-none" : "hover:-translate-y-1"
+        )}>
             <Card className={cn(
-                "glass-panel border-l-4 overflow-hidden",
-                isZero ? "border-l-slate-200" : "border-l-amber-400 hover:shadow-md"
+                "rounded-2xl transition-colors shadow-sm",
+                isZero ? "bg-white border border-slate-200" : colorConfig.bg
             )}>
-                <CardContent className="p-5 flex items-center justify-between">
-                    <div className="flex items-start gap-4">
-                        <div className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg",
-                            isZero ? "bg-slate-100 text-slate-400" : "bg-amber-100 text-amber-700 font-extrabold ring-4 ring-amber-50"
-                        )}>
-                            {count}
+                <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                        <div className="relative shrink-0">
+                            <div className={cn(
+                                "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform",
+                                isZero ? colorConfig.iconDefaultBg : colorConfig.iconBg
+                            )}>
+                                {isZero ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
+                            </div>
+                            {!isZero && (
+                                <div className="absolute -top-1.5 -right-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                                    {count > 99 ? '99+' : count}
+                                </div>
+                            )}
                         </div>
-                        <div>
-                            <h3 className={cn("font-semibold text-lg leading-none mb-1.5", isZero ? "text-slate-600" : "text-foreground")}>{title}</h3>
-                            <p className="text-sm text-muted-foreground">{description}</p>
+                        <div className="min-w-0">
+                            <h3 className={cn(
+                                "font-bold text-[15px] sm:text-base leading-none mb-1.5 truncate",
+                                isZero ? "text-slate-500" : colorConfig.text
+                            )}>
+                                {title}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-slate-500 line-clamp-1 sm:line-clamp-none leading-relaxed">
+                                {isZero ? "All caught up" : description}
+                            </p>
                         </div>
                     </div>
-                    {!isZero && <ArrowRight className="text-slate-300 w-5 h-5 flex-shrink-0" />}
-                </CardContent>
+                    {!isZero && (
+                        <div className="shrink-0 w-8 h-8 rounded-full bg-white/60 flex items-center justify-center">
+                            <ArrowRight className={cn("w-4 h-4", colorConfig.text, "opacity-60")} />
+                        </div>
+                    )}
+                </div>
             </Card>
         </Link>
     )

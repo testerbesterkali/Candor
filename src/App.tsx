@@ -8,6 +8,11 @@ import Auth from './pages/Auth'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Landing from './pages/Landing'
+import Pipeline from './pages/Pipeline'
+import TalentBank from './pages/TalentBank'
+import Score from './pages/Score'
+import Settings from './pages/Settings'
+import Review from './pages/Review'
 
 // Layouts
 import AppLayout from './components/layout/AppLayout'
@@ -95,11 +100,11 @@ function App() {
         {/* Protected Routes with Dashboard Layout */}
         <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/pipeline" element={<div>Pipeline View Coming Soon</div>} />
-          <Route path="/talent-bank" element={<div>Talent Bank Coming Soon</div>} />
-          <Route path="/score" element={<div>Candor Score Coming Soon</div>} />
-          <Route path="/settings" element={<div>Settings Coming Soon</div>} />
-          <Route path="/review/:id" element={<div>Email Review Coming Soon</div>} />
+          <Route path="/pipeline" element={<Pipeline />} />
+          <Route path="/talent-bank" element={<TalentBank />} />
+          <Route path="/score" element={<Score />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/review/:id" element={<Review />} />
         </Route>
       </Routes>
     </BrowserRouter>
