@@ -1,0 +1,347 @@
+# .antigravity
+# Candor — AI Agent Configuration
+# Drop this file in the root of your project repo.
+# Compatible with: Cursor, Windsurf, Claude Code, GitHub Copilot Workspace
+
+project_name: Candor
+version: 1.0.0
+description: >
+  Candidate experience automation SaaS. Generates personalized rejection emails,
+  status nudges, and re-engagement messages written in the company's specific voice.
+  Every candidate who applies to a company using Candor walks away feeling respected.
+
+# ─────────────────────────────────────────────
+# STACK
+# ─────────────────────────────────────────────
+stack:
+  frontend:
+    framework: React 18
+    bundler: Vite
+    language: TypeScript (strict mode)
+    styling: TailwindCSS
+    routing: React Router v6
+    server_state: TanStack Query v5
+    client_state: Zustand
+    forms: React Hook Form + Zod
+    charts: Recharts
+    virtualization: "@tanstack/react-virtual"
+    file_preview: PDF.js
+
+  backend:
+    platform: Supabase
+    database: PostgreSQL 15
+    auth: Supabase Auth
+    storage: Supabase Storage
+    functions: Supabase Edge Functions (Deno)
+    realtime: Supabase Realtime
+    vector: pgvector (text-embedding-3-small, 1536 dimensions)
+    cron: pg_cron
+
+  ai:
+    email_generation: GPT-4o (temperature 0.4, max_tokens 400)
+    voice_extraction: GPT-4o
+    resume_parsing: GPT-4o vision
+    classification: GPT-4o mini
+    confidence_scoring: GPT-4o mini (two calls per email)
+    embedding: text-embedding-3-small
+
+  integrations:
+    email_delivery: Resend
+    user_email_sender: Gmail OAuth (Google APIs)
+    payments: Stripe (subscriptions)
+
+  deployment:
+    frontend: Vercel
+    backend: Supabase (managed)
+
+# ─────────────────────────────────────────────
+# ABSOLUTE CONSTRAINTS — NEVER VIOLATE THESE
+# ─────────────────────────────────────────────
+constraints:
+  no_mock_data: true
+  # No Math.random() IDs. No hardcoded arrays. No mockData.ts files.
+  # No useState([fakeObject]). Every value comes from Supabase or an Edge Function.
+  # Empty database = proper empty state UI. Never fake data.
+
+  no_placeholder_logic: true
+  # No console.log("would send here"). No alert("success"). No // TODO: wire up.
+  # Every button that implies an action performs that action against the real backend.
+
+  no_hardcoded_secrets: true
+  # All keys in .env only. Accessed via import.meta.env on frontend.
+  # Never inline API keys, Supabase URLs, or Stripe keys.
+
+  no_any_type: true
+  # TypeScript strict mode. No `any`. No `as any`.
+  # Generate types from Supabase schema: supabase gen types typescript
+
+  rls_mandatory: true
+  # Every table has RLS enabled before any data operation is built on top of it.
+  # Every RLS policy scoped to company_id from JWT claims.
+  # Zero cross-company data leakage is a hard requirement.
+
+  handle_all_async_states: true
+  # Every async operation has: loading skeleton, success state, error state with
+  # human-readable message and retry. Never a blank screen during loading.
+
+  ai_calls_server_only: true
+  # All OpenAI API calls happen inside Supabase Edge Functions.
+  # The frontend never calls OpenAI directly.
+  # The frontend never holds or transmits OpenAI API keys.
+
+  resume_storage_private: true
+  # Resume files in Supabase Storage private bucket only.
+  # Frontend accesses resumes via signed URLs (1-hour expiry).
+  # Never expose public resume URLs.
+
+# ─────────────────────────────────────────────
+# BUILD ORDER — ENFORCE THIS SEQUENCE
+# ─────────────────────────────────────────────
+build_order:
+  - step: 1
+    name: Supabase schema + RLS
+    description: >
+      Create all tables, enable pgvector, write all RLS policies, generate TypeScript
+      types. Verify connection before writing any React component.
+
+  - step: 2
+    name: Edge Functions — AI pipeline
+    description: >
+      Build and test all 7 Edge Functions in isolation before frontend touches them:
+      extract-voice-profile, parse-resume, classify-intent, generate-email,
+      send-email, run-talent-bank-matching, score-candor, process-feedback-loop
+
+  - step: 3
+    name: Auth screen
+    description: >
+      Supabase Auth signup and login. On signup: create profiles row and companies row.
+      Redirect logic based on onboarding completion state.
+
+  - step: 4
+    name: Onboarding wizard
+    description: >
+      Three steps: ATS connection (CSV + skip for MVP), voice calibration (calls
+      extract-voice-profile Edge Function), notifications. State persisted to Supabase.
+
+  - step: 5
+    name: Main layout + routing
+    description: >
+      Sidebar with live review queue badge count. Protected routes. Onboarding guard.
+
+  - step: 6
+    name: Dashboard
+    description: >
+      Four stat cards from real queries. Needs Attention section. Activity feed.
+
+  - step: 7
+    name: Pipeline (kanban)
+    description: >
+      Kanban board from real candidate data. Status indicators from real timestamps.
+      Mark rejected flow calling classify-intent then generate-email. Candidate detail
+      panel with PDF viewer and real communication history. Bulk reject with progress.
+
+  - step: 8
+    name: Email review page
+    description: >
+      Two-panel layout. Inline editable draft. Confidence score breakdown from DB.
+      All four actions wired to real Edge Functions. Auto-send countdown timer.
+
+  - step: 9
+    name: Talent bank
+    description: >
+      Full-text search via Supabase. Filter by skills, role, status. Re-engage modal
+      with AI-generated draft. All status updates write to Supabase.
+
+  - step: 10
+    name: Candor Score
+    description: >
+      Score ring, sub-scores from snapshots table, Recharts history chart, benchmark
+      from aggregate query, embeddable badge with copy-to-clipboard.
+
+  - step: 11
+    name: Settings
+    description: >
+      Five tabs all pre-populated from live data. Logo upload to Storage. Stripe
+      Checkout integration. Slack webhook test. Voice recalibration modal.
+
+  - step: 12
+    name: Cron jobs
+    description: >
+      pg_cron setup: nudge detection (10 min), auto-send (2 hours), ATS polling
+      (3 hours), nightly scoring, weekly voice drift check.
+
+# ─────────────────────────────────────────────
+# DATA MODEL REFERENCE
+# ─────────────────────────────────────────────
+tables:
+  - profiles
+  - companies
+  - roles
+  - candidates
+  - communications
+  - talent_bank_matches
+  - score_snapshots
+  - function_logs
+
+key_enums:
+  company_plan: [starter, growth, scale]
+  ats_type: [greenhouse, lever, ashby, workable, bamboohr, csv, none]
+  candidate_status: [applied, screening, interview, offer, rejected, archived]
+  communication_type: [rejection, nudge, reengagement]
+  communication_status: [draft, queued, sent, failed, discarded]
+  talent_bank_status: [dormant, contacted, responded, hired]
+  intent_class:
+    - rejection_standard
+    - rejection_internal_fill
+    - rejection_overqualified
+    - nudge_still_reviewing
+    - nudge_timeline_delay
+    - reengagement_new_role
+    - reengagement_pipeline_refresh
+    - escalate_to_human
+
+# ─────────────────────────────────────────────
+# EDGE FUNCTIONS REFERENCE
+# ─────────────────────────────────────────────
+edge_functions:
+  - name: extract-voice-profile
+    trigger: onboarding completion
+    ai: GPT-4o
+    writes_to: companies.voice_profile
+
+  - name: parse-resume
+    trigger: candidate creation with resume_url
+    ai: GPT-4o vision + text-embedding-3-small
+    writes_to: candidates.resume_parsed, candidates.skills, candidates.alignment_score, candidates.key_mismatch, candidates.embedding
+
+  - name: classify-intent
+    trigger: before email generation
+    ai: GPT-4o mini
+    writes_to: nothing (pure compute)
+
+  - name: generate-email
+    trigger: rejection, nudge, or re-engagement action
+    ai: GPT-4o + GPT-4o mini (x2 for scoring) + pgvector RAG
+    writes_to: communications (new row)
+
+  - name: send-email
+    trigger: user approval or auto-send timer expiry
+    integration: Resend
+    writes_to: communications.status, communications.sent_at
+
+  - name: run-talent-bank-matching
+    trigger: role created or status → open
+    ai: text-embedding-3-small + pgvector cosine similarity
+    writes_to: talent_bank_matches, roles.embedding
+
+  - name: score-candor
+    trigger: nightly cron
+    ai: none (pure SQL aggregation)
+    writes_to: score_snapshots, companies.candor_score
+
+  - name: process-feedback-loop
+    trigger: nightly cron
+    ai: GPT-4o
+    writes_to: companies.voice_profile (refinements)
+
+# ─────────────────────────────────────────────
+# CONFIDENCE SCORING WEIGHTS
+# ─────────────────────────────────────────────
+confidence_scoring:
+  specificity_weight: 0.35       # Does email reference candidate's specific background?
+  voice_match_weight: 0.30       # Cosine similarity vs. calibration samples
+  safety_weight: 0.25            # No legal risk, discrimination signals, blacklisted topics
+  length_weight: 0.10            # 60-160 words = 1.0
+
+  routing:
+    auto_send_threshold: 0.80    # Queue with 2-hour window
+    review_threshold: 0.60       # Flag for human review
+    hold_threshold: 0.00         # Below 0.60 or any safety flag = hold + escalate
+
+# ─────────────────────────────────────────────
+# CRON SCHEDULE
+# ─────────────────────────────────────────────
+cron_jobs:
+  - name: nudge_detection
+    schedule: "*/10 * * * *"
+    action: detect candidates 7+ days without status change, generate nudge emails
+
+  - name: auto_send
+    schedule: "0 */2 * * *"
+    action: send queued emails older than 2 hours
+
+  - name: ats_poll
+    schedule: "0 */3 * * *"
+    action: poll ATS APIs for stage changes (Greenhouse first)
+
+  - name: nightly_scoring
+    schedule: "0 2 * * *"
+    action: score-candor + process-feedback-loop for all active companies
+
+  - name: voice_drift_check
+    schedule: "0 3 * * 0"
+    action: compare recent email embeddings vs calibration. Alert if drift < 0.60
+
+# ─────────────────────────────────────────────
+# PERFORMANCE TARGETS
+# ─────────────────────────────────────────────
+performance:
+  dashboard_load_ms: 2000
+  email_generation_ms: 10000
+  pipeline_max_candidates: 500
+  pipeline_virtualization: true         # @tanstack/react-virtual on kanban columns
+  dashboard_stale_time_ms: 60000        # TanStack Query staleTime for stat cards
+  activity_feed: realtime               # Supabase Realtime subscription
+  review_badge_count: realtime          # Supabase Realtime subscription
+
+# ─────────────────────────────────────────────
+# SECURITY REQUIREMENTS
+# ─────────────────────────────────────────────
+security:
+  rls_on_all_tables: true
+  resume_bucket_visibility: private
+  resume_url_expiry_seconds: 3600
+  file_upload_allowed_types: [application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document]
+  file_upload_max_bytes: 10485760       # 10MB
+  candidate_email_never_in_url: true
+  all_ai_calls_server_side: true
+  stripe_webhook_signature_verified: true
+
+# ─────────────────────────────────────────────
+# DEFINITION OF DONE
+# ─────────────────────────────────────────────
+done_criteria:
+  - reads_from_real_supabase: true
+  - writes_to_real_supabase: true
+  - loading_state_implemented: true
+  - error_state_implemented: true
+  - empty_state_implemented: true
+  - typescript_no_errors: true           # tsc --noEmit passes
+  - rls_tested: true                     # Verified cross-company data blocked
+  - works_with_500_rows: true
+  - no_mock_data: true
+  - no_hardcoded_values: true
+
+# ─────────────────────────────────────────────
+# ERROR HANDLING STANDARD
+# ─────────────────────────────────────────────
+error_handling:
+  edge_function_response_shape: "{ success: boolean, data?: any, error?: { code: string, message: string } }"
+  log_table: function_logs
+  log_fields: [function_name, company_id, input_summary, error_code, error_message, created_at]
+  user_facing_errors: human_readable_only   # Never show raw Supabase or OpenAI errors
+  openai_timeout_behavior: >
+    Save as draft. Retry after 5 minutes, then 30 minutes. After 3 failures,
+    mark as "Manual send required" and notify user.
+
+# ─────────────────────────────────────────────
+# OUT OF SCOPE FOR V1
+# ─────────────────────────────────────────────
+out_of_scope:
+  - native_mobile_app
+  - candidate_facing_portal
+  - video_interview_tooling
+  - payroll_or_hris_integration
+  - ai_phone_screening
+  - white_label_agency_mode
+  - lever_ashby_workable_bamboohr_oauth  # Greenhouse CSV only for MVP ATS

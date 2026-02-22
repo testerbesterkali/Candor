@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;      /* Very light cool gray */
+    --foreground: 222 47% 11%;      /* Deep blue-gray text */
+    
+    --primary: 235 65% 45%;         /* Rich deep blue core */
+    --primary-foreground: 210 40% 98%;
+
+    --card: 0 0% 100%;              /* Pure white cards */
+    --card-foreground: 222 47% 11%;
+    
+    --muted: 210 20% 94%;           /* Soft background for inactive elements */
+    --muted-foreground: 215 15% 45%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --radius: 0.75rem;              /* Soft rounded corners */
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* Subtle glassmorphism utilities & card defaults */
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm rounded-xl;
+  }
+}
