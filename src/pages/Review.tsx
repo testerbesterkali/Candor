@@ -74,7 +74,7 @@ export default function Review() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in pb-16">
+        <div className="space-y-6 animate-in fade-in p-8 pb-20">
 
             <button onClick={() => navigate(-1)} className="flex items-center text-sm text-slate-500 hover:text-slate-900 transition-colors">
                 <ArrowLeft className="w-4 h-4 mr-1" /> Back to pipeline
@@ -82,8 +82,8 @@ export default function Review() {
 
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Review Draft</h1>
-                    <p className="text-muted-foreground mt-1">
+                    <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Review Draft</h1>
+                    <p className="text-slate-500 mt-2 text-lg">
                         To: <span className="font-medium text-slate-700">{communication.candidates?.name}</span> ({communication.candidates?.email})
                     </p>
                 </div>

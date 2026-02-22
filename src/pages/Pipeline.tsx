@@ -55,11 +55,11 @@ export default function Pipeline() {
             <div className={cn("flex-1 flex flex-col h-full bg-slate-50/50 transition-all duration-300", selectedCandidateId ? "mr-[400px]" : "")}>
 
                 {/* Header */}
-                <div className="px-6 py-6 sm:py-8 border-b border-slate-200 bg-white shadow-sm z-10">
+                <div className="px-8 py-8 border-b border-slate-200 bg-white shadow-sm z-10">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Pipeline</h1>
-                            <p className="text-slate-500 mt-1">Manage candidate communication statuses across all open roles.</p>
+                            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Pipeline</h1>
+                            <p className="text-slate-500 mt-2 text-lg">Manage candidate communication statuses across all open roles.</p>
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <div className="relative w-full sm:w-64">
@@ -78,7 +78,7 @@ export default function Pipeline() {
                 </div>
 
                 {/* Kanban Board */}
-                <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 hidden-scrollbar">
+                <div className="flex-1 overflow-x-auto overflow-y-hidden p-8 hidden-scrollbar">
                     <div className="flex gap-6 h-full min-w-max pb-4">
                         {STAGES.map(stage => {
                             const stageCandidates = filtered.filter(c => (c.status || 'applied') === stage.id)

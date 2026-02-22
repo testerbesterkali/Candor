@@ -93,7 +93,7 @@ export default function Dashboard() {
     const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-8 pb-20">
 
             {/* Header Section */}
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-10 shadow-xl">

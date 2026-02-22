@@ -66,7 +66,7 @@ export default function TalentBank() {
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6 animate-in fade-in p-8 pb-20">
 
             {/* Header */}
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-10 shadow-xl">

@@ -81,7 +81,7 @@ export default function AppLayout() {
 
             {/* Main Content */}
             <main className="flex-1 ml-64 min-h-screen">
-                <div className="p-8 max-w-7xl mx-auto">
+                <div className="w-full">
                     <Outlet />
                 </div>
             </main>
